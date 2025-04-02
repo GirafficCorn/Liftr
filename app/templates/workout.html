@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h2>
+        Here is today's workout:<br>
+        {{  workout.Date }}
+        {% for exercise in workout.Exercises %}
+        <ul>
+            <li>{{ exercise }}</li>
+        </ul>
+        {% endfor %}
+    </h2>
+{% endblock %}
