@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ user.username }}</h1><br>
+<h1>Your Exercises: </h1>
+<table>
+    <tr>
+        <th>Exercise</th>
+        <th>Description</th>
+    </tr>
+    {% for exercise in exercises %}
+    <tr>
+        <td>{{ exercise.exercise_name.upper()}}</td>
+        <td>{{ exercise.description }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+
+{% endblock %}
