@@ -1,21 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ user.username }}</h1><br>
-<h1>Your Exercises: </h1>
-<table>
-    <tr>
-        <th>Exercise</th>
-        <th>Description</th>
-    </tr>
-    {% for exercise in exercises %}
-    <tr>
-        <td>{{ exercise.exercise_name.upper()}}</td>
-        <td>{{ exercise.description }}</td>
-    </tr>
-    {% endfor %}
-</table>
+<h1>Username: {{ current_user.username }}</h1><br>
+<h3>Email: {{ current_user.email }}</h3><br>
 
-
-
+<form action="" method="POST">
+    {{ form.hidden_tag() }}
+    <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Profile Information</legend>
+        <div class="form-group">
+            {{ form.username.label(class="form-control-label") }}
+            {% if form.username.errors %}
+                {{ form.username(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.username.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.username(class="form-control form-control-lg") }}
+            {% endif %}
+        </div>
+        <div class="form-group">
+            {{ form.email.label(class="form-control-label") }}
+            {% if form.email.errors %}
+                {{ form.username(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.email.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.email(class="form-control form-control-lg") }}
+            {% endif %}
+    </fieldset>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-outline-info") }}
+    </div>
+</form>
+</div>
 {% endblock %}
