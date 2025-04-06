@@ -7,7 +7,7 @@ import sqlalchemy as sql
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=32)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
@@ -19,8 +19,8 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Username already exists.')
         
     def validate_email(self, email):
-        email = db.session.scalars(sql.select(User).where(User.email == email.data))
-        if email:
+        user = db.session.scalar(sql.select(User).where(User.email == email.data))
+        if user:
             raise ValidationError('Email already exists.')
 
 class LoginForm(FlaskForm):

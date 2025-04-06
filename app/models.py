@@ -9,7 +9,7 @@ from flask_login import UserMixin
 
 class User(db.Model, UserMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
-    username : orm.Mapped[str] = orm.mapped_column(sql.String(32), unique=True)
+    username : orm.Mapped[str] = orm.mapped_column(sql.String(64), unique=True)
     email: orm.Mapped[str] = orm.mapped_column(sql.String(120), unique=True)
     password_hash: orm.Mapped[str] = orm.mapped_column(sql.String(256))
     exercises: orm.WriteOnlyMapped['Exercise'] = orm.relationship(back_populates='author')
