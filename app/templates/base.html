@@ -28,13 +28,13 @@
             <div class="collapse navbar-collapse" id="navbarToggle">
               <div class="navbar-nav mr-auto">
                 <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
-                <a class="nav-item nav-link" href="{{ url_for('workouts') }}">Workouts</a>
               </div>
               <div class="navbar-nav">
                 {% if current_user.is_anonymous %}
                 <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
                 <a class="nav-item nav-link" href="{{ url_for('register') }}">Register</a>
                 {% else %}
+                <a class="nav-item nav-link" href="{{ url_for('workout') }}">Workouts</a>
                 <a class="nav-item nav-link" href="{{ url_for('exercise') }}">Your Exercises</a>
                 <a class="nav-item nav-link" href="{{ url_for('profile') }}">Profile</a>
                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>

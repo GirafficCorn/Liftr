@@ -1,8 +1,8 @@
 from flask import render_template, url_for, flash, redirect, request
 from app import app
 import datetime
-from app.forms import RegistrationForm, LoginForm, UpdateProfileForm, ExerciseForm
-from app.models import User, Exercise
+from app.forms import RegistrationForm, LoginForm, UpdateProfileForm, ExerciseForm, WorkoutForm
+from app.models import User, Exercise, Workout, WorkoutExercise
 from app import db
 import sqlalchemy as sql
 from flask_login import login_user, current_user, logout_user, login_required
@@ -15,7 +15,7 @@ workout = {
 
 }
 
-
+#TODO: Write getter and setter functions
 
 
 
@@ -26,8 +26,34 @@ def home():
 
 
 @app.route('/workout')
-def workouts():
-    return render_template('workout.html', title='Workouts', workout=workout)
+def workout():
+    form = WorkoutForm()
+    user_exercises = Exercise.query.filter_by(user_id=current_user.id).all()
+    exercise_choices = []
+
+    for ex in user_exercises:
+        exercise_choices.append((ex.id, ex.exercise_name))
+
+    for exercise_form in form.exercises:
+        exercise_form.exercise_id.choices = exercise_choices
+
+    if form.validate_on_submit():
+        workout = add_workout(form)
+        db.session.flush()
+
+        for exercise_entry in form.exercises.data:
+            workout_exercise = WorkoutExercise(
+                workout_id=workout.id,
+                exercise_id=exercise_entry['exercise_id'],
+                sets=exercise_entry['sets'],
+                reps=exercise_entry['reps']
+            )
+            db.session.add(workout_exercise)
+        
+        db.session.commit()
+        flash('Workout created successfully!', 'success')
+        return redirect(url_for('workout'))
+    return render_template('workout.html', title='Workouts', form=form)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -107,11 +133,14 @@ def update_profile(form):
     db.session.commit()
     flash('Your account has been updated!', 'success')
 
-'''def add_exercise(form):
-    exercise = Exercise(exercise_name=form.exercise_name.data, description=form.description.data)
-    db.session.add(exercise)
-    db.session.commit()
-    flash(f'Exercise added successfully!', 'success')'''
 
+def add_workout(form):
+    workout = Workout(date=form.date.data, 
+                      title=form.title.data, 
+                      user_id=current_user.id, 
+                      notes=form.notes.data
+                      )
+    db.session.add(workout)
+    return workout
 
 

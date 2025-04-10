@@ -2,13 +2,44 @@
 
 
 {% block content %}
-    <h2>
-        Here is today's workout:<br>
-        {{  workout.Date }}
-        {% for exercise in workout.Exercises %}
-        <ul>
-            <li>{{ exercise }}</li>
-        </ul>
-        {% endfor %}
-    </h2>
+    <div class="content-section">
+        <form action="" method="POST">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Add Workout</legend>
+                <div class="form-group">
+                    {{ form.title.label(class="form-control-label") }}
+                    {{ form.title(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ form.date.label(class="form-control-label") }}
+                    {{ form.date(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ form.notes.label(class="form-control-label") }}
+                    {{ form.notes(class="form-control form-control-leg") }}
+                </div>
+                {% for exercise_form in form.exercises %}
+                    <div class="form-group">
+                        {{ exercise_form.exercise_id.label(class="form-control-label") }} 
+                        {{ exercise_form.exercise_id(class="form-control form-control-leg") }}
+                    </div>
+                    <div class="form-group">
+                        {{ exercise_form.sets.label(class="form-control-label") }} 
+                        {{ exercise_form.sets(class="form-control form-control-leg") }}
+                    </div>
+                    <div class="form-group">
+                        {{ exercise_form.reps.label(class="form-control-label") }} 
+                        {{ exercise_form.reps(class="form-control form-control-leg") }}
+                    </div>
+                {% endfor %}
+            </fieldset>
+            <br>
+            <button type="button" id="add-exercise-btn" class="btn btn-secondary mb-3">Add Another Exercise</button>
+            <br>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+        </form>
+    </div>
+   
 {% endblock %}

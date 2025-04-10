@@ -12,7 +12,9 @@ class User(db.Model, UserMixin):
     username : orm.Mapped[str] = orm.mapped_column(sql.String(64), unique=True)
     email: orm.Mapped[str] = orm.mapped_column(sql.String(120), unique=True)
     password_hash: orm.Mapped[str] = orm.mapped_column(sql.String(256))
-    exercises: orm.WriteOnlyMapped['Exercise'] = orm.relationship(back_populates='author')
+    exercises: orm.Mapped[list['Exercise']] = orm.relationship(back_populates='author')
+    workouts: orm.WriteOnlyMapped[list['Workout']] = orm.relationship(back_populates='user')
+
 
     def __repr__(self):
         return f'Username: {self.username}, Email: {self.email}'
@@ -31,22 +33,30 @@ class Exercise(db.Model):
     user_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(User.id)) 
     author : orm.Mapped[User] = orm.relationship(back_populates='exercises')
 
+    workout_exercises: orm.Mapped[list['WorkoutExercise']] = orm.relationship('WorkoutExercise', back_populates='exercise')
+
     def __repr__(self):
         return f'Exercise Name: {self.exercise_name}, Description: {self.description}, Author: {self.author}'
     
-
+#TODO Add weight
 class Workout(db.Model):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     date: orm.Mapped[datetime] = orm.mapped_column(sql.DateTime, default=lambda: datetime.now(timezone.utc))
     title: orm.Mapped[str] = orm.mapped_column(sql.String(120))
     user_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(User.id))
     notes: orm.Mapped[str] = orm.mapped_column(sql.String(300))
+    
+    user: orm.Mapped['User'] = orm.relationship(back_populates='workouts')
+    workout_exercises: orm.Mapped[list['WorkoutExercise']] = orm.relationship('WorkoutExercise', back_populates='workout')
 
+class WorkoutExercise(db.Model):
+    workout_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey('workout.id'), primary_key=True)
+    exercise_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey('exercise.id'), primary_key=True)
+    sets: orm.Mapped[int] = orm.mapped_column(db.Integer, nullable=False, default=3)
+    reps: orm.Mapped[int] = orm.mapped_column(db.Integer, nullable=False, default=10)
 
-class WorkoutExerciseAssociation(db.Model):
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
-    workout_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Workout.id))
-    exercise_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Exercise.id))
+    workout: orm.Mapped['Workout'] = orm.relationship('Workout', back_populates='workout_exercises')
+    exercise: orm.Mapped['Exercise'] = orm.relationship('Exercise', back_populates='workout_exercises')
 
 @login.user_loader
 def load_user(id):
