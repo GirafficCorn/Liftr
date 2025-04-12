@@ -3,4 +3,7 @@
 {% block content %}
     <h1>Welcome to Liftr!</h1>
     <h2>This is a test block</h2> 
+    {% for workout in workouts %}
+        {{ workout.title }}<br>
+    {% endfor %}
 {% endblock %}

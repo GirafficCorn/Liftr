@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block content %}
+</div>
+</div>
+<div class="row">
+    <!-- Main Content Column -->
+    <div class="col-md-3">
+        <div class="content-section">
+            <form action="" method="POST">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">{{ legend }}</legend>
+                    <div class="form-group">
+                        {{ form.title.label(class="form-control-label") }}
+                        {{ form.title(class="form-control form-control-lg") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.date.label(class="form-control-label") }}
+                        {{ form.date(class="form-control form-control-lg", type="date") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.notes.label(class="form-control-label") }}
+                        {{ form.notes(class="form-control form-control-lg") }}
+                    </div>
+
+                    <h4 class="my-3">Exercises</h4>
+                    <div id="exercises-container">
+                        {% for exercise_form in form.exercises %}
+                            <div class="exercise-container border p-3 mb-3">
+                                {{ exercise_form.hidden_tag() }}
+                                <div class="form-group">
+                                    {{ exercise_form.exercise_id.label(class="form-control-label") }} 
+                                    {{ exercise_form.exercise_id(class="form-control form-control-lg") }}
+                                </div>
+                                <div class="sets-container">
+                                    {% for set_form in exercise_form.sets %}
+                                        <div class="set-container border p-2 mb-2">
+                                            {{ set_form.hidden_tag() }}
+                                            <div class="form-group">
+                                                {{ set_form.sets.label(class="form-control-label") }} 
+                                                {{ set_form.sets(class="form-control form-control-lg") }}
+                                            </div>
+                                            <div class="form-group">
+                                                {{ set_form.reps.label(class="form-control-label") }} 
+                                                {{ set_form.reps(class="form-control form-control-lg") }}
+                                            </div>
+                                            <div class="form-group">
+                                                {{ set_form.weight.label(class="form-control-label") }} 
+                                                {{ set_form.weight(class="form-control form-control-lg") }}
+                                            </div>
+                                            {% if loop.index > 1 %}
+                                                <button type="button" class="btn btn-outline-danger btn-sm remove-set-btn">Remove Set</button>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-secondary add-set-btn">Add Set</button>
+                                    {%if legend == 'Update Workout' or loop.index > 1 %}
+                                        <button type="button" class="btn btn-danger remove-exercise-btn">Remove Exercise</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3 mt-4">
+                        <button type="button" id="add-exercise-btn" class="btn btn-primary">Add Another Exercise</button>
+                    </div>
+                </fieldset>
+                <div class="form-group mt-3">
+                    {{ form.submit(class="btn btn-outline-info") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addExerciseBtn = document.getElementById('add-exercise-btn');
+        const exercisesContainer = document.getElementById('exercises-container');
+        
+        // If no exercises exist yet, create an initial one
+        if (exercisesContainer.children.length === 0) {
+            createInitialExercise();
+        }
+        
+        // Add event listeners to existing buttons
+        document.querySelectorAll('.add-set-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const exerciseContainer = this.closest('.exercise-container');
+                const exerciseIndex = Array.from(exercisesContainer.children).indexOf(exerciseContainer);
+                const setsContainer = exerciseContainer.querySelector('.sets-container');
+                const setCount = setsContainer.children.length;
+                
+                addNewSet(setsContainer, exerciseIndex, setCount);
+            });
+        });
+        
+        document.querySelectorAll('.remove-set-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                this.closest('.set-container').remove();
+            });
+        });
+        
+        document.querySelectorAll('.remove-exercise-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                this.closest('.exercise-container').remove();
+            });
+        });
+        
+        // Add exercise button click handler
+        addExerciseBtn.addEventListener('click', function() {
+            const exerciseCount = exercisesContainer.children.length;
+            addNewExercise(exerciseCount);
+        });
+        
+        // Function to add a new exercise
+        function addNewExercise(index) {
+            // Create container for the new exercise
+            const exerciseContainer = document.createElement('div');
+            exerciseContainer.classList.add('exercise-container', 'border', 'p-3', 'mb-3');
+            
+            // Get the exercise selection template
+            const exerciseGroup = document.createElement('div');
+            exerciseGroup.classList.add('form-group');
+            
+            const exerciseLabel = document.createElement('label');
+            exerciseLabel.setAttribute('for', `exercises-${index}-exercise_id`);
+            exerciseLabel.classList.add('form-control-label');
+            exerciseLabel.textContent = 'Exercise';
+            
+            const exerciseSelect = document.createElement('select');
+            exerciseSelect.id = `exercises-${index}-exercise_id`;
+            exerciseSelect.name = `exercises-${index}-exercise_id`;
+            exerciseSelect.classList.add('form-control', 'form-control-lg');
+            
+            // Clone options from an existing select if available
+            const existingSelect = document.querySelector('[id$="-exercise_id"]');
+            if (existingSelect) {
+                Array.from(existingSelect.options).forEach(option => {
+                    const newOption = document.createElement('option');
+                    newOption.value = option.value;
+                    newOption.textContent = option.textContent;
+                    exerciseSelect.appendChild(newOption);
+                });
+            }
+            
+            exerciseGroup.appendChild(exerciseLabel);
+            exerciseGroup.appendChild(exerciseSelect);
+            exerciseContainer.appendChild(exerciseGroup);
+            
+            // Add hidden CSRF token
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = `exercises-${index}-csrf_token`;
+            hiddenInput.value = document.querySelector('[name="csrf_token"]').value;
+            exerciseContainer.appendChild(hiddenInput);
+            
+            // Create sets container
+            const setsContainer = document.createElement('div');
+            setsContainer.classList.add('sets-container');
+            exerciseContainer.appendChild(setsContainer);
+            
+            // Add initial set
+            addNewSet(setsContainer, index, 0);
+            
+            // Add buttons
+            const buttonContainer = document.createElement('div');
+            buttonContainer.classList.add('mt-3');
+            
+            const addSetBtn = document.createElement('button');
+            addSetBtn.type = 'button';
+            addSetBtn.classList.add('btn', 'btn-secondary', 'add-set-btn');
+            addSetBtn.textContent = 'Add Set';
+            addSetBtn.addEventListener('click', function() {
+                const setCount = setsContainer.children.length;
+                addNewSet(setsContainer, index, setCount);
+            });
+            
+            const removeExerciseBtn = document.createElement('button');
+            removeExerciseBtn.type = 'button';
+            removeExerciseBtn.classList.add('btn', 'btn-danger', 'remove-exercise-btn', 'ml-2');
+            removeExerciseBtn.textContent = 'Remove Exercise';
+            removeExerciseBtn.addEventListener('click', function() {
+                exerciseContainer.remove();
+            });
+            
+            buttonContainer.appendChild(addSetBtn);
+            buttonContainer.appendChild(removeExerciseBtn);
+            exerciseContainer.appendChild(buttonContainer);
+            
+            // Add to the container
+            exercisesContainer.appendChild(exerciseContainer);
+        }
+        
+        // Function to add a new set
+        function addNewSet(container, exerciseIndex, setIndex) {
+            // Create set container
+            const setContainer = document.createElement('div');
+            setContainer.classList.add('set-container', 'border', 'p-2', 'mb-2');
+            
+            // Add hidden CSRF token
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = `exercises-${exerciseIndex}-sets-${setIndex}-csrf_token`;
+            hiddenInput.value = document.querySelector('[name="csrf_token"]').value;
+            setContainer.appendChild(hiddenInput);
+            
+            // Create set form groups
+            ['sets', 'reps', 'weight'].forEach(field => {
+                const formGroup = document.createElement('div');
+                formGroup.classList.add('form-group');
+                
+                const label = document.createElement('label');
+                label.setAttribute('for', `exercises-${exerciseIndex}-sets-${setIndex}-${field}`);
+                label.classList.add('form-control-label');
+                label.textContent = field.charAt(0).toUpperCase() + field.slice(1);
+                
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.id = `exercises-${exerciseIndex}-sets-${setIndex}-${field}`;
+                input.name = `exercises-${exerciseIndex}-sets-${setIndex}-${field}`;
+                input.classList.add('form-control', 'form-control-lg');
+                
+                formGroup.appendChild(label);
+                formGroup.appendChild(input);
+                setContainer.appendChild(formGroup);
+            });
+            
+            // Add remove button if this is not the first set
+            if (setIndex > 0) {
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.classList.add('btn', 'btn-outline-danger', 'btn-sm', 'remove-set-btn');
+                removeBtn.textContent = 'Remove Set';
+                removeBtn.addEventListener('click', function() {
+                    setContainer.remove();
+                });
+                setContainer.appendChild(removeBtn);
+            }
+            
+            // Add to the container
+            container.appendChild(setContainer);
+        }
+        
+        // Function to create the initial exercise if none exists
+        function createInitialExercise() {
+            // Get the first exercise template
+            const exerciseCount = exercisesContainer.children.length;
+            addNewExercise(exerciseCount);
+        }
+
+        if (isUpdateMode) {
+            const firstExercise = exercisesContainer.querySelector('.exercise-container');
+            if (firstExercise) {
+                const buttonContainer = firstExercise.querySelector('.mt-3');
+                if (buttonContainer && !buttonContainer.querySelector('.remove-exercise-btn')) {
+                    const removeExerciseBtn = document.createElement('button');
+                    removeExerciseBtn.type = 'button';
+                    removeExerciseBtn.classList.add('btn', 'btn-danger', 'remove-exercise-btn', 'ml-2');
+                    removeExerciseBtn.textContent = 'Remove Exercise';
+                    removeExerciseBtn.addEventListener('click', function() {
+                        firstExercise.remove();
+                    });
+                    buttonContainer.appendChild(removeExerciseBtn);
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

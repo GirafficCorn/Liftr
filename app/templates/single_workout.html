@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+</div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <div class="content-section">
+            <h4 class="article-title">Workout: {{ workout.title }}</h4>
+            <a class="btn btn-outline-info"" href="{{ url_for('update_workout', workout_id=workout.id) }}">Update Workout</a><br>
+            Date: {{workout.date }}<br>
+            {% for exercise in workout.workout_exercises %}
+                Exercise: {{ exercise.exercise.exercise_name }}<br>
+                {% for sets in exercise.exercise_sets %}
+                    Sets: {{ sets.set_number }} Reps: {{ sets.reps }}<br>
+                {% endfor %}
+            {% endfor %}<br>
+        </div>  
+    </div>
+</div>
+{% endblock %}

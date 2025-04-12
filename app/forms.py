@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, FieldList, SelectField, FormField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, FieldList, SelectField, FormField, IntegerField, DateTimeField
 from wtforms.fields import DateField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from app.models import User, Exercise
@@ -59,13 +59,17 @@ class UpdateProfileForm(FlaskForm):
             if user:
                 raise ValidationError('Email already exists.')
             
-class WorkoutExercise(FlaskForm):
-    exercise_id = SelectField('Exercise', coerce=int)
+
+class ExerciseSet(FlaskForm):
     sets = IntegerField('Sets')
     reps = IntegerField('Reps')
-        
+    weight = IntegerField('Weight')
+            
 
-
+class WorkoutExercise(FlaskForm):
+    exercise_id = SelectField('Exercise', coerce=int)
+    sets = FieldList(FormField(ExerciseSet))
+          
             
 class WorkoutForm(FlaskForm):
     date = DateField('Date', validators=[DataRequired()])
